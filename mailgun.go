@@ -3,8 +3,8 @@
 package mailgun
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"os"
 
@@ -18,10 +18,10 @@ import (
 )
 
 type MailgunReq struct {
-	Sender string `json:"sender"`
+	Sender    string `json:"sender"`
 	Recipient string `json:"recipient"`
-	Subject string `json:"subject"`
-	Body string `json:"stripped-text"`
+	Subject   string `json:"subject"`
+	Body      string `json:"stripped-text"`
 }
 
 func init() {
@@ -31,19 +31,19 @@ func init() {
 type drv struct{}
 
 func (d *drv) Open(r *httprouter.Router) (driver.Conn, error) {
-	c := &conn {
+	c := &conn{
 		Mailgun: mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"), ""),
-		Domain: os.Getenv("MAILGUN_DOMAIN"),
-		ApiKey: os.Getenv("MAILGUN_API_KEY"),
+		Domain:  os.Getenv("MAILGUN_DOMAIN"),
+		ApiKey:  os.Getenv("MAILGUN_API_KEY"),
 	}
 
 	hm := dt.NewHandlerMap([]dt.RouteHandler{
 		{
 			// Path is prefixed by "mailgun" automatically. Thus the
 			// path below becomes "/mailgun"
-			Path:    "/",
-			Method:  "POST",
-			Handler: func (w http.ResponseWriter, r *http.Request) {
+			Path:   "/",
+			Method: "POST",
+			Handler: func(w http.ResponseWriter, r *http.Request) {
 				var mgreq MailgunReq
 				err := json.NewDecoder(r.Body).Decode(&mgreq)
 				if err != nil {
@@ -70,8 +70,8 @@ func (d *drv) Open(r *httprouter.Router) (driver.Conn, error) {
 
 type conn struct {
 	Mailgun mailgun.Mailgun
-	Domain string
-	ApiKey string
+	Domain  string
+	ApiKey  string
 }
 
 func (c *conn) Receive(from, subj, html string) error {
@@ -83,14 +83,14 @@ func (c *conn) Receive(from, subj, html string) error {
 		return err
 	}
 
-	ret, _, err := core.ProcessText(req)
+	ret, err := core.ProcessText(req)
 	if err != nil {
 		log.Debug(err)
 		ret = "Something went wrong with my wiring... I'll get that fixed up soon."
 		return err
 	}
 
-	return c.SendPlainText([]string{from}, "Abot", "Re: " + subj, ret)
+	return c.SendPlainText([]string{from}, "Abot", "Re: "+subj, ret)
 }
 
 func (c *conn) SendHTML(to []string, from, subj, html string) error {
@@ -98,7 +98,7 @@ func (c *conn) SendHTML(to []string, from, subj, html string) error {
 }
 
 func (c *conn) SendPlainText(to []string, from, subj, plaintext string) error {
-	m := c.Mailgun.NewMessage(from + " <abot@" + c.Domain + ">", subj, plaintext, to[0])
+	m := c.Mailgun.NewMessage(from+" <abot@"+c.Domain+">", subj, plaintext, to[0])
 
 	_, _, err := c.Mailgun.Send(m)
 
