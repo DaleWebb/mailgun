@@ -1,4 +1,5 @@
 {
 	"Name": "Mailgun",
-	"Icon": "assets/images/icon.png"
+	"Maintainer": "Dale Webb <dale@personajobs.com>",
+	"Icon": "https://cdn.rawgit.com/DaleWebb/mailgun/master/assets/images/icon.png"
 }
