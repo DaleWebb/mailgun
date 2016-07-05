@@ -4,7 +4,6 @@ package mailgun
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"os"
 
@@ -16,13 +15,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/mailgun/mailgun-go"
 )
-
-type MailgunReq struct {
-	Sender    string `json:"sender"`
-	Recipient string `json:"recipient"`
-	Subject   string `json:"subject"`
-	Body      string `json:"stripped-text"`
-}
 
 func init() {
 	email.Register("mailgun", &drv{})
@@ -44,15 +36,8 @@ func (d *drv) Open(r *httprouter.Router) (driver.Conn, error) {
 			Path:   "/",
 			Method: "POST",
 			Handler: func(w http.ResponseWriter, r *http.Request) {
-				var mgreq MailgunReq
-				err := json.NewDecoder(r.Body).Decode(&mgreq)
-				if err != nil {
-					log.Debug(err)
-					w.WriteHeader(500)
-					w.Write(nil)
-					return
-				}
-				err = c.Receive(mgreq.Sender, mgreq.Subject, mgreq.Body)
+				r.ParseForm()
+				err := c.Receive(r.Form["from"][0], r.Form["subject"][0], r.Form["stripped-text"][0])
 				if err != nil {
 					log.Debug(err)
 					w.WriteHeader(500)

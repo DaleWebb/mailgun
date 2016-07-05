@@ -1,11 +1,12 @@
 package mailgun
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/itsabot/abot/core"
@@ -32,15 +33,19 @@ func TestMain(m *testing.M) {
 
 func TestHandler(t *testing.T) {
 	u := fmt.Sprintf("http://localhost:%s/mailgun", os.Getenv("PORT"))
-	data := []byte(`{ "stripped-text": "Hello!", "sender": "dale_webb@hotmail.com", "recipient": "dale_webb@hotmail.com", "subject": "test" }`)
-	c, _ := request("POST", u, data)
+	form := url.Values{}
+	form.Add("body", "Hello!")
+	form.Add("sender", "dale_webb@hotmail.com")
+	form.Add("recipient", "dale_webb@hotmail.com")
+	form.Add("subject", "test")
+	c, _ := request("POST", u, form.Encode())
 	if c != 200 {
 		t.Fatal("expected 200. got", c)
 	}
 }
 
-func request(method, path string, data []byte) (int, string) {
-	r, err := http.NewRequest(method, path, bytes.NewBuffer(data))
+func request(method, path string, data string) (int, string) {
+	r, err := http.NewRequest(method, path, strings.NewReader(data))
 	if err != nil {
 		return 0, "err completing request: " + err.Error()
 	}

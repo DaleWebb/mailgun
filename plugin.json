@@ -1,5 +1,7 @@
 {
 	"Name": "Mailgun",
-	"Maintainer": "Dale Webb <dale@personajobs.com>",
+	"Maintainer": "Dale Webb <dale.a.webb@gmail.com>",
+	"AbotVersion": "0.2",
+	"Description": "Email plugin for Mailgun",
 	"Icon": "https://cdn.rawgit.com/DaleWebb/mailgun/master/assets/images/icon.png"
 }
